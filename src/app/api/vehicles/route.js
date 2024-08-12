@@ -18,20 +18,29 @@ function isValidVin(vin) {
     return vinRegex.test(vin);
 }
 
-// Helper function to ensure the vehicles table exists
-async function ensureVehiclesTableExists() {
+// Function to ensure the organizations and vehicles tables exist
+async function ensureTablesExist() {
     try {
         await sql`
+            CREATE TABLE IF NOT EXISTS organizations (
+                name VARCHAR(255) PRIMARY KEY,
+                account VARCHAR(255) NOT NULL,
+                website VARCHAR(255),
+                fuel_reimbursement_policy VARCHAR(255) DEFAULT '1000',
+                speed_limit_policy VARCHAR(255)
+            );
+        `;
+
+        await sql`
             CREATE TABLE IF NOT EXISTS vehicles (
-                id SERIAL PRIMARY KEY,
-                vin VARCHAR(17) NOT NULL UNIQUE,
+                vin VARCHAR(17) PRIMARY KEY,
                 org_name VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (org_name) REFERENCES organizations(name)
             );
         `;
     } catch (error) {
-        console.error('Error creating vehicles table:', error);
+        console.error('Error creating tables:', error);
         throw error;
     }
 }
@@ -58,13 +67,21 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Organization name is required.' }, { status: 400 });
         }
 
-        // Ensure the vehicles table exists
-        await ensureVehiclesTableExists();
+        // Ensure the organizations and vehicles tables exist
+        await ensureTablesExist();
 
         // Check if the organization exists
         const orgExists = await checkOrgExists(orgName);
         if (!orgExists) {
             return NextResponse.json({ error: 'Organization name does not exist.' }, { status: 400 });
+        }
+
+        // Check if the VIN already exists
+        const existingVehicle = await sql`
+            SELECT * FROM vehicles WHERE vin = ${vin};
+        `;
+        if (existingVehicle.length > 0) {
+            return NextResponse.json({ error: 'Vehicle with this VIN already exists.' }, { status: 409 });
         }
 
         // Insert the vehicle into the database
@@ -76,24 +93,37 @@ export async function POST(request) {
         return NextResponse.json({ message: 'Vehicle added successfully', vin, orgName }, { status: 201 });
     } catch (error) {
         console.error('Error adding vehicle:', error);
-        return NextResponse.json({ error: 'Failed to add vehicle', details: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to add vehicle' }, { status: 500 });
     }
 }
 
-// GET Method: Retrieve all vehicles
-export async function GET() {
+// GET Method: Fetch a vehicle by VIN
+export async function GET(request) {
     try {
-        // Ensure the vehicles table exists
-        await ensureVehiclesTableExists();
+        // Extract VIN from query parameters
+        const { searchParams } = new URL(request.url);
+        const vin = searchParams.get('vin');
 
-        // Retrieve all vehicles from the database
-        const vehicles = await sql`
-            SELECT * FROM vehicles;
+        // Validate the VIN
+        if (!vin || !isValidVin(vin)) {
+            return NextResponse.json({ error: 'Invalid VIN. It should be a 17-character alphanumeric string.' }, { status: 400 });
+        }
+
+        // Ensure the vehicles table exists
+        await ensureTablesExist();
+
+        // Retrieve the vehicle by VIN
+        const vehicle = await sql`
+            SELECT * FROM vehicles WHERE vin = ${vin};
         `;
 
-        return NextResponse.json(vehicles, { status: 200 });
+        if (vehicle.length === 0) {
+            return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 });
+        }
+
+        return NextResponse.json(vehicle[0], { status: 200 });
     } catch (error) {
-        console.error('Error retrieving vehicles:', error);
-        return NextResponse.json({ error: 'Failed to retrieve vehicles', details: error.message }, { status: 500 });
+        console.error('Error retrieving vehicle:', error);
+        return NextResponse.json({ error: 'Failed to retrieve vehicle' }, { status: 500 });
     }
 }
