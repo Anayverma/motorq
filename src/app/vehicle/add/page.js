@@ -19,6 +19,8 @@ const AddVehicle = () => {
       const data = await response.json();
       if (response.ok) {
         setMessage(`Success: ${data.message}`);
+        setVin('');
+        setOrgName('');
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -28,30 +30,36 @@ const AddVehicle = () => {
   };
 
   return (
-    <div>
-      <h2>Add Vehicle</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>VIN:</label>
+    <div className="container">
+      <h2 className="title">Add Vehicle</h2>
+      <form className="form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="vin" className="form-label">VIN:</label>
           <input
             type="text"
+            id="vin"
+            className="form-input"
             value={vin}
             onChange={(e) => setVin(e.target.value)}
             required
+            placeholder="Enter 17-character VIN"
           />
         </div>
-        <div>
-          <label>Organization Name:</label>
+        <div className="form-group">
+          <label htmlFor="orgName" className="form-label">Organization Name:</label>
           <input
             type="text"
+            id="orgName"
+            className="form-input"
             value={orgName}
             onChange={(e) => setOrgName(e.target.value)}
             required
+            placeholder="Enter organization name"
           />
         </div>
-        <button type="submit">Add Vehicle</button>
+        <button type="submit" className="submit-button ">Add Vehicle</button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 };

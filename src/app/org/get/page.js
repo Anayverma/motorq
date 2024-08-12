@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Organisation from "./Organisation";
+// import Organisation from "./Organisation";
 
 const GetOrganisation = () => {
   const [organizations, setOrganizations] = useState([]);
@@ -32,7 +32,7 @@ const GetOrganisation = () => {
 
   return (
     <>
-      <Organisation />
+      <div />
       <div className="p-6">
         <h2 className="text-3xl font-bold mb-4">Organizations</h2>
         {error ? (

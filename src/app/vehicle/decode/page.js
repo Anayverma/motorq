@@ -25,7 +25,7 @@ const DecodeVin = () => {
       }
 
       const data = await response.json();
-      setDecodedData(data);
+      // setDecodedData(data);
       setMessageType("success");
       setMessage("VIN decoded successfully!");
 
@@ -75,17 +75,7 @@ const DecodeVin = () => {
           Submit
         </button>
       </form>
-      {decodedData && (
-        <div className="mt-6 bg-gray-100 p-4 rounded shadow">
-          <h3 className="text-xl font-bold mb-2">Decoded VIN Details:</h3>
-          <p><strong>Make:</strong> {decodedData.make}</p>
-          <p><strong>Model:</strong> {decodedData.model}</p>
-          <p><strong>Year:</strong> {decodedData.year}</p>
-          <p><strong>Trim:</strong> {decodedData.trim}</p>
-          <p><strong>Engine:</strong> {decodedData.engine}</p>
-          {/* Add more fields based on the decoded data structure */}
-        </div>
-      )}
+     
     </div>
   );
 };

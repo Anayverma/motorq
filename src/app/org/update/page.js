@@ -1,5 +1,5 @@
+"use client";
 import React, { useState } from "react";
-import Organisation from "./Organisation";
 
 const UpdateOrganization = () => {
   const [organizationName, setOrganizationName] = useState("");
@@ -42,7 +42,6 @@ const UpdateOrganization = () => {
 
   return (
     <>
-      <Organisation />
       <div className="bg-white p-6 rounded shadow-md mt-6">
         <h2 className="text-3xl font-bold mb-4">Update Organization Policy</h2>
         <form onSubmit={handleSubmit}>

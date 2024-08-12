@@ -6,8 +6,10 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const vin = searchParams.get('vin');
 
-    if (!vin) {
-        return NextResponse.json({ error: 'VIN is required' }, { status: 400 });
+    // Validate the VIN
+    if (!vin || vin.length !== 17) {
+        console.log(vin)
+        return NextResponse.json({ error: 'A valid 17-character VIN is required' }, { status: 400 });
     }
 
     // Construct the API URL
